@@ -1,0 +1,20 @@
+{
+	"folders": [
+		{
+			"path": "../.."
+		},
+		{
+			"name": "engine",
+			"path": "../../../nextreport-testing/engine"
+		},
+		{
+			"path": "../../../jsreport-testing"
+		},
+		{
+			"path": "../../../sdd-examples"
+		}
+	],
+	"settings": {
+		"terminal.integrated.tabs.defaultColor": null
+	}
+}

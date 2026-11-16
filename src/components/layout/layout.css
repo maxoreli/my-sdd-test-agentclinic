@@ -1,0 +1,40 @@
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: #f4fbf9;
+  color: #123;
+}
+
+.site {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.site-header,
+.site-footer {
+  padding: 1rem 1.5rem;
+  background: #e2f3ee;
+}
+
+.site-name {
+  font-weight: 700;
+}
+
+.site-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 1rem;
+}
+
+.site-footer {
+  text-align: center;
+}
+
+.site-footer p {
+  margin: 0;
+}
