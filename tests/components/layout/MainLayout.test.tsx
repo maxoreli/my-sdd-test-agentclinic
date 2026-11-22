@@ -10,15 +10,15 @@ describe("MainLayout", () => {
   );
 
   it("renders the header with the AgentClinic name", () => {
-    expect(html).toMatch(/<header class="site-header">.*AgentClinic.*<\/header>/);
+    expect(html).toMatch(/<header class="container">.*AgentClinic.*<\/header>/);
   });
 
   it("renders page content inside main", () => {
-    expect(html).toContain('<main class="site-main"><p>page content</p></main>');
+    expect(html).toContain('<main class="container"><p>page content</p></main>');
   });
 
   it("renders the footer line", () => {
-    expect(html).toMatch(/<footer class="site-footer">.*Be kind to your agents\..*<\/footer>/);
+    expect(html).toMatch(/<footer class="container">.*Be kind to your agents\..*<\/footer>/);
   });
 
   it("orders header, main, then footer", () => {

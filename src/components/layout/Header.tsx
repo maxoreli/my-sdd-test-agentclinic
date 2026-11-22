@@ -1,7 +1,7 @@
 export function Header() {
   return (
-    <header className="site-header">
-      <span className="site-name">AgentClinic</span>
+    <header className="container">
+      <strong>AgentClinic</strong>
     </header>
   );
 }

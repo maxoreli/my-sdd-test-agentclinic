@@ -1,4 +1,6 @@
 import type { Metadata, Viewport } from "next";
+// PicoCSS loads first, so the app's variable overrides in layout.css win.
+import "@picocss/pico/css/pico.min.css";
 import { MainLayout } from "@/components/layout/MainLayout";
 
 export const metadata: Metadata = {
