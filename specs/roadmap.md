@@ -9,7 +9,7 @@ Every phase that adds or changes web UI must meet the responsive requirements in
 - Create the Next.js (TypeScript) app
 - A server-rendered home page and a "health" route handler
 
-## Phase 2: Database
+## Phase 2: Database ✅ Complete
 
 - Connect SQLite and add a migration setup
 - One seeded table to prove the round trip
