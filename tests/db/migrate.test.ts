@@ -1,0 +1,51 @@
+import { describe, expect, it } from "vitest";
+import { createDb } from "@/db/client";
+import { runMigrations } from "@/db/migrate";
+import { agents } from "@/db/schema";
+
+interface ColumnInfo {
+  name: string;
+  type: string;
+  notnull: number;
+  pk: number;
+}
+
+describe("runMigrations", () => {
+  function migratedDb() {
+    const db = createDb(":memory:");
+    runMigrations(db);
+    return db;
+  }
+
+  it("creates the agents table with the expected columns", () => {
+    const columns = migratedDb().$client.pragma("table_info(agents)") as ColumnInfo[];
+    expect(columns.map(({ name, type, notnull, pk }) => ({ name, type, notnull, pk }))).toEqual([
+      { name: "id", type: "INTEGER", notnull: 1, pk: 1 },
+      { name: "name", type: "TEXT", notnull: 1, pk: 0 },
+      { name: "model", type: "TEXT", notnull: 1, pk: 0 },
+      { name: "created_at", type: "INTEGER", notnull: 1, pk: 0 },
+    ]);
+  });
+
+  it("makes agent names unique", () => {
+    const db = migratedDb();
+    db.insert(agents).values({ name: "Twin", model: "m" }).run();
+    expect(() => db.insert(agents).values({ name: "Twin", model: "m" }).run()).toThrow(/UNIQUE/);
+  });
+
+  it("fills in id and created_at by default", () => {
+    const db = migratedDb();
+    const before = Math.floor(Date.now() / 1000);
+    const [row] = db.insert(agents).values({ name: "New", model: "m" }).returning().all();
+    expect(row.id).toBe(1);
+    expect(row.createdAt).toBeInstanceOf(Date);
+    expect(Math.floor(row.createdAt.getTime() / 1000)).toBeGreaterThanOrEqual(before);
+  });
+
+  it("is safe to run more than once", () => {
+    const db = migratedDb();
+    db.insert(agents).values({ name: "Stays", model: "m" }).run();
+    expect(() => runMigrations(db)).not.toThrow();
+    expect(db.select().from(agents).all()).toHaveLength(1);
+  });
+});
