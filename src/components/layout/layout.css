@@ -40,3 +40,10 @@
     display: block;
   }
 }
+
+/* Dashboard panel links: a full 44px tap target. */
+.panel-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}

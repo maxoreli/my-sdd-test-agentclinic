@@ -1,30 +1,28 @@
-import { listAgents } from "@/db/agents";
+import Link from "next/link";
 import { getDb } from "@/db/client";
-import type { Agent } from "@/db/schema";
+import { EMPTY_SUMMARY, getDashboardSummary, type DashboardSummary } from "@/db/dashboard";
+import { formatDateTime } from "@/lib/format";
 import { getRole } from "@/lib/role";
 
 // Read the clinic on every request, so the build never needs a database file.
 export const dynamic = "force-dynamic";
 
-/** The agents in the waiting room, or `null` if the database isn't set up yet. */
-function loadWaitingRoom(): Agent[] | null {
+/** The dashboard summary, or `null` if the database isn't set up yet. */
+function loadSummary(now: Date): DashboardSummary | null {
   try {
-    return listAgents(getDb());
+    return getDashboardSummary(getDb(), now);
   } catch (error) {
-    console.warn("AgentClinic: waiting room unavailable:", error instanceof Error ? error.message : error);
+    console.warn("AgentClinic: dashboard unavailable:", error instanceof Error ? error.message : error);
     return null;
   }
 }
 
-function waitingRoomLine(count: number): string {
-  return count === 1
-    ? "1 agent is in the waiting room"
-    : `${count} agents are in the waiting room`;
-}
+const plural = (count: number, one: string, many: string) => (count === 1 ? one : many.replace("#", String(count)));
 
 export default async function Dashboard() {
   const role = await getRole();
-  const agents = loadWaitingRoom();
+  const summary = loadSummary(new Date());
+  const { agents, ailments, appointments } = summary ?? EMPTY_SUMMARY;
 
   return (
     <>
@@ -36,12 +34,12 @@ export default async function Dashboard() {
       <div className="grid">
         <article aria-labelledby="panel-agents">
           <h2 id="panel-agents">Agents</h2>
-          {agents && agents.length > 0 ? (
+          {agents.count > 0 ? (
             <>
-              <p>{waitingRoomLine(agents.length)}</p>
+              <p>{plural(agents.count, "1 agent is in the waiting room", "# agents are in the waiting room")}</p>
               <ul>
-                {agents.map((agent) => (
-                  <li key={agent.id}>{agent.name}</li>
+                {agents.names.map((name) => (
+                  <li key={name}>{name}</li>
                 ))}
               </ul>
             </>
@@ -54,16 +52,53 @@ export default async function Dashboard() {
               </p>
             </>
           )}
+          <footer>
+            <Link href="/agents" className="panel-link">View all agents</Link>
+          </footer>
         </article>
 
         <article aria-labelledby="panel-ailments">
           <h2 id="panel-ailments">Open ailments</h2>
-          <p>Coming soon: a tally of what&apos;s troubling our agents.</p>
+          {ailments.count > 0 ? (
+            <>
+              <p>{plural(ailments.count, "1 open ailment", "# open ailments")}</p>
+              <ul>
+                {ailments.latest.map((ailment) => (
+                  <li key={ailment.id}>
+                    {ailment.name} <small>({ailment.agentName}, {ailment.severity})</small>
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : (
+            <p>No open ailments. Everyone&apos;s feeling suspiciously well.</p>
+          )}
+          <footer>
+            <Link href="/ailments" className="panel-link">View all ailments</Link>
+          </footer>
         </article>
 
         <article aria-labelledby="panel-appointments">
           <h2 id="panel-appointments">Upcoming appointments</h2>
-          <p>Coming soon: who&apos;s next on the couch.</p>
+          {appointments.count > 0 ? (
+            <>
+              <p>{plural(appointments.count, "1 upcoming appointment", "# upcoming appointments")}</p>
+              <ul>
+                {appointments.next.map((appointment) => (
+                  <li key={appointment.id}>
+                    <time dateTime={appointment.startsAt.toISOString()}>{formatDateTime(appointment.startsAt)}</time>
+                    <br />
+                    {appointment.agentName}: {appointment.therapyName}
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : (
+            <p>The couch is free. No appointments coming up.</p>
+          )}
+          <footer>
+            <Link href="/appointments" className="panel-link">View the schedule</Link>
+          </footer>
         </article>
       </div>
     </>

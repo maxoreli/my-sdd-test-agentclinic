@@ -4,7 +4,7 @@ import Dashboard, { dynamic } from "@/app/page";
 import { metadata, viewport } from "@/app/layout";
 import { createDb, getDb } from "@/db/client";
 import { agents } from "@/db/schema";
-import { SEED_AGENTS } from "@/db/seed";
+import { SEED_AGENTS, SEED_AILMENTS, SEED_APPOINTMENTS } from "@/db/seed";
 import { getRole } from "@/lib/role";
 import { createTestDb } from "../helpers/db";
 
@@ -22,13 +22,18 @@ const mockedGetDb = vi.mocked(getDb);
 const mockedGetRole = vi.mocked(getRole);
 const render = async () => renderToStaticMarkup(await Dashboard());
 
+const NOW = new Date("2026-11-24T12:00:00Z");
+
 beforeEach(() => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(NOW);
   mockedGetRole.mockResolvedValue("staff");
   // The fallback path logs why the waiting room is unavailable; keep test output quiet.
   vi.spyOn(console, "warn").mockImplementation(() => {});
 });
 
 afterEach(() => {
+  vi.useRealTimers();
   vi.restoreAllMocks();
   mockedGetDb.mockReset();
   mockedGetRole.mockReset();
@@ -74,6 +79,55 @@ describe("dashboard", () => {
       }
       expect(list.match(/<li>/g)).toHaveLength(SEED_AGENTS.length);
     });
+  });
+
+  describe("panels with seeded data", () => {
+    beforeEach(() => {
+      mockedGetDb.mockReturnValue(createTestDb({ seed: true }));
+    });
+
+    const panel = (html: string, id: string) =>
+      html.match(new RegExp(`<article aria-labelledby="panel-${id}">(.*?)</article>`))?.[1] ?? "";
+
+    it("counts open ailments and lists the three most recent with agent and severity", async () => {
+      const ailments = panel(await render(), "ailments");
+      expect(ailments).toContain(`<p>${SEED_AILMENTS.length} open ailments</p>`);
+      expect(ailments.match(/<li>/g)).toHaveLength(3);
+      expect(ailments).toMatch(/<li>[^<]+ <small>\([^,]+, (mild|moderate|severe)\)<\/small><\/li>/);
+    });
+
+    it("counts upcoming appointments and lists the next three in UTC", async () => {
+      const appointments = panel(await render(), "appointments");
+      expect(appointments).toContain(`<p>${SEED_APPOINTMENTS.length} upcoming appointments</p>`);
+      expect(appointments.match(/<li>/g)).toHaveLength(3);
+      expect(appointments).toContain(
+        '<li><time dateTime="2026-11-25T09:00:00.000Z">Wed, 25 Nov 2026, 09:00 UTC</time><br/>Captain Context: Context Window Decluttering</li>',
+      );
+    });
+
+    it("links each panel to its page", async () => {
+      const html = await render();
+      expect(panel(html, "agents")).toContain('<a class="panel-link" href="/agents">View all agents</a>');
+      expect(panel(html, "ailments")).toContain('<a class="panel-link" href="/ailments">View all ailments</a>');
+      expect(panel(html, "appointments")).toContain('<a class="panel-link" href="/appointments">View the schedule</a>');
+    });
+  });
+
+  it("has playful empty states for every panel", async () => {
+    mockedGetDb.mockReturnValue(createTestDb());
+    const html = await render();
+    expect(html).toContain("The waiting room is empty.");
+    expect(html).toContain("No open ailments. Everyone&#x27;s feeling suspiciously well.");
+    expect(html).toContain("The couch is free. No appointments coming up.");
+  });
+
+  it("uses the singular for one ailment and one appointment", async () => {
+    const db = createTestDb({ seed: true });
+    db.$client.exec("DELETE FROM ailment_therapies; DELETE FROM ailments WHERE id > 1; DELETE FROM appointments WHERE id > 1;");
+    mockedGetDb.mockReturnValue(db);
+    const html = await render();
+    expect(html).toContain("<p>1 open ailment</p>");
+    expect(html).toContain("<p>1 upcoming appointment</p>");
   });
 
   it("uses the singular when one agent is waiting", async () => {

@@ -40,7 +40,7 @@ Every phase that adds or changes web UI must meet the responsive requirements in
 - View the appointment schedule, with a layout that adapts to small screens
 - Book an appointment for an agent with a therapy, using a form that is usable on touch screens
 
-## Phase 8: Dashboard data
+## Phase 8: Dashboard data ✅ Complete
 
 - Replace placeholders with real summaries (agents, open ailments, upcoming appointments), keeping the responsive panel layout
 
