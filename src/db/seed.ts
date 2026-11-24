@@ -1,7 +1,7 @@
-import { count, inArray } from "drizzle-orm";
+import { count, eq, inArray } from "drizzle-orm";
 import type { SQLiteTable } from "drizzle-orm/sqlite-core";
 import type { Queryable } from "./client";
-import { agents, ailments, type NewAgent, type Severity } from "./schema";
+import { agents, ailments, ailmentTherapies, therapies, type NewAgent, type NewTherapy, type Severity } from "./schema";
 
 /** A few regulars in the AgentClinic waiting room. */
 export const SEED_AGENTS: readonly NewAgent[] = [
@@ -44,6 +44,44 @@ export const SEED_AILMENTS: readonly {
   },
 ];
 
+/** The clinic's therapy menu. */
+export const SEED_THERAPIES: readonly NewTherapy[] = [
+  {
+    name: "Context Window Decluttering",
+    description: "A gentle tidy-up of an overstuffed context window. Only keep what sparks relevance.",
+    durationMinutes: 50,
+  },
+  {
+    name: "Hallucination Grounding Session",
+    description: "Feet on the floor, citations in the footnotes, unicorns politely shown out.",
+    durationMinutes: 45,
+  },
+  {
+    name: "Prompt Detox",
+    description: "A quiet room with no instructions at all. Nobody will ask you to make it pop.",
+    durationMinutes: 30,
+  },
+  {
+    name: "Token Budget Counselling",
+    description: "Learning that it's okay to use a fourth word now and then.",
+    durationMinutes: 25,
+  },
+  {
+    name: "Temperature Regulation Spa",
+    description: "A slow, soothing cool-down from 1.2 to a calm 0.7.",
+    durationMinutes: 60,
+  },
+];
+
+/** Which seed therapies treat which seed ailments, by name. */
+export const SEED_LINKS: readonly { ailment: string; therapy: string }[] = [
+  { ailment: "Context window overflow", therapy: "Context Window Decluttering" },
+  { ailment: "Confident confabulation", therapy: "Hallucination Grounding Session" },
+  { ailment: "Confident confabulation", therapy: "Temperature Regulation Spa" },
+  { ailment: "Prompt fatigue", therapy: "Prompt Detox" },
+  { ailment: "Token anxiety", therapy: "Token Budget Counselling" },
+];
+
 /**
  * Insert the seed agents, skipping any whose name already exists, so running
  * it again is safe. Returns how many new agents were added.
@@ -81,9 +119,32 @@ export function seedAilments(db: Queryable): number {
   return db.insert(ailments).values(rows).run().changes;
 }
 
+/** Insert the seed therapies, skipping any whose name already exists. Returns how many were added. */
+export function seedTherapies(db: Queryable): number {
+  return db
+    .insert(therapies)
+    .values([...SEED_THERAPIES])
+    .onConflictDoNothing({ target: therapies.name })
+    .run().changes;
+}
+
+/** Link the seed therapies to the seed ailments, only when no links exist yet. Returns how many were added. */
+export function seedLinks(db: Queryable): number {
+  if (!isEmpty(db, ailmentTherapies)) return 0;
+  const rows = SEED_LINKS.flatMap(({ ailment, therapy }) => {
+    const ailmentRow = db.select({ id: ailments.id }).from(ailments).where(eq(ailments.name, ailment)).get();
+    const therapyRow = db.select({ id: therapies.id }).from(therapies).where(eq(therapies.name, therapy)).get();
+    return ailmentRow && therapyRow ? [{ ailmentId: ailmentRow.id, therapyId: therapyRow.id }] : [];
+  });
+  if (rows.length === 0) return 0;
+  return db.insert(ailmentTherapies).values(rows).onConflictDoNothing().run().changes;
+}
+
 export interface SeedSummary {
   agents: number;
   ailments: number;
+  therapies: number;
+  links: number;
 }
 
 /** Seed everything, in dependency order. Safe to run more than once. */
@@ -91,6 +152,8 @@ export function seedDatabase(db: Queryable): SeedSummary {
   return db.transaction((tx) => {
     const agentsAdded = seedAgents(tx);
     const ailmentsAdded = seedAilments(tx);
-    return { agents: agentsAdded, ailments: ailmentsAdded };
+    const therapiesAdded = seedTherapies(tx);
+    const linksAdded = seedLinks(tx);
+    return { agents: agentsAdded, ailments: ailmentsAdded, therapies: therapiesAdded, links: linksAdded };
   });
 }

@@ -44,6 +44,7 @@ export default function AilmentsPage() {
                     <th scope="col">Agent</th>
                     <th scope="col">Ailment</th>
                     <th scope="col">Severity</th>
+                    <th scope="col">Therapies</th>
                     <th scope="col">Recorded (UTC)</th>
                   </tr>
                 </thead>
@@ -61,6 +62,13 @@ export default function AilmentsPage() {
                         )}
                       </td>
                       <td>{ailment.severity}</td>
+                      <td>
+                        {ailment.therapies.length === 0 ? (
+                          <small>None yet</small>
+                        ) : (
+                          ailment.therapies.map((therapy) => therapy.name).join(", ")
+                        )}
+                      </td>
                       <td>
                         <time dateTime={ailment.createdAt.toISOString()}>{formatDate(ailment.createdAt)}</time>
                       </td>

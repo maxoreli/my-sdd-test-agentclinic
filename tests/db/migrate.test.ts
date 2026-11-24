@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createDb } from "@/db/client";
 import { runMigrations } from "@/db/migrate";
-import { agents, ailments } from "@/db/schema";
+import { agents, ailments, ailmentTherapies, therapies } from "@/db/schema";
 
 interface ColumnInfo {
   name: string;
@@ -76,5 +76,36 @@ describe("ailments migration", () => {
     expect(() =>
       db.insert(ailments).values({ agentId: 999, name: "Orphan", severity: "mild" }).run(),
     ).toThrow(/FOREIGN KEY/);
+  });
+});
+
+describe("therapies migration", () => {
+  function migratedDb() {
+    const db = createDb(":memory:");
+    runMigrations(db);
+    return db;
+  }
+
+  it("creates the therapies table with a unique name", () => {
+    const db = migratedDb();
+    const columns = db.$client.pragma("table_info(therapies)") as ColumnInfo[];
+    expect(columns.map((c) => c.name)).toEqual(["id", "name", "description", "duration_minutes"]);
+    db.insert(therapies).values({ name: "Nap", description: "z", durationMinutes: 5 }).run();
+    expect(() => db.insert(therapies).values({ name: "Nap", description: "z", durationMinutes: 5 }).run()).toThrow(/UNIQUE/);
+  });
+
+  it("creates the ailment_therapies join table keyed by both ids, with foreign keys", () => {
+    const db = migratedDb();
+    const columns = db.$client.pragma("table_info(ailment_therapies)") as ColumnInfo[];
+    expect(columns.map(({ name, pk }) => ({ name, pk }))).toEqual([
+      { name: "ailment_id", pk: 1 },
+      { name: "therapy_id", pk: 2 },
+    ]);
+    const keys = db.$client.pragma("foreign_key_list(ailment_therapies)") as { table: string; from: string }[];
+    expect(keys.map(({ table, from }) => ({ table, from })).sort((a, b) => a.from.localeCompare(b.from))).toEqual([
+      { table: "ailments", from: "ailment_id" },
+      { table: "therapies", from: "therapy_id" },
+    ]);
+    expect(() => db.insert(ailmentTherapies).values({ ailmentId: 1, therapyId: 1 }).run()).toThrow(/FOREIGN KEY/);
   });
 });

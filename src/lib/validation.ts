@@ -31,3 +31,8 @@ export const ailmentSchema = z.object({
 });
 
 export type AilmentFormInput = z.infer<typeof ailmentSchema>;
+
+export const linkSchema = z.object({
+  ailmentId: selectedId("Choose which ailment to treat."),
+  therapyId: selectedId("Choose a therapy."),
+});

@@ -26,6 +26,7 @@ describe("GET /api/ailments", () => {
       name: expect.any(String),
       severity: expect.stringMatching(/^(mild|moderate|severe)$/),
       description: expect.any(String),
+      therapies: expect.any(Array),
       createdAt: expect.stringMatching(/Z$/),
     });
   });

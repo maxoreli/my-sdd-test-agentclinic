@@ -1,6 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { agents, ailments } from "@/db/schema";
-import { SEED_AGENTS, SEED_AILMENTS, seedAgents, seedAilments, seedDatabase } from "@/db/seed";
+import { agents, ailments, ailmentTherapies, therapies } from "@/db/schema";
+import {
+  SEED_AGENTS,
+  SEED_AILMENTS,
+  SEED_LINKS,
+  SEED_THERAPIES,
+  seedAgents,
+  seedAilments,
+  seedDatabase,
+  seedLinks,
+  seedTherapies,
+} from "@/db/seed";
 import { createTestDb } from "../helpers/db";
 
 describe("seedAgents", () => {
@@ -62,13 +72,48 @@ describe("seedAilments", () => {
 describe("seedDatabase", () => {
   it("seeds every table and reports what it added", () => {
     const db = createTestDb();
-    expect(seedDatabase(db)).toEqual({ agents: SEED_AGENTS.length, ailments: SEED_AILMENTS.length });
+    expect(seedDatabase(db)).toEqual({
+      agents: SEED_AGENTS.length,
+      ailments: SEED_AILMENTS.length,
+      therapies: SEED_THERAPIES.length,
+      links: SEED_LINKS.length,
+    });
   });
 
   it("adds nothing the second time", () => {
     const db = createTestDb();
     seedDatabase(db);
-    expect(seedDatabase(db)).toEqual({ agents: 0, ailments: 0 });
+    expect(seedDatabase(db)).toEqual({ agents: 0, ailments: 0, therapies: 0, links: 0 });
+    expect(db.select().from(therapies).all()).toHaveLength(SEED_THERAPIES.length);
+    expect(db.select().from(ailmentTherapies).all()).toHaveLength(SEED_LINKS.length);
     expect(db.select().from(ailments).all()).toHaveLength(SEED_AILMENTS.length);
+  });
+});
+
+describe("seedTherapies", () => {
+  it("stocks the therapy menu and skips names already on it", () => {
+    const db = createTestDb();
+    db.insert(therapies).values({ ...SEED_THERAPIES[0], description: "Our own version", durationMinutes: 5 }).run();
+    expect(seedTherapies(db)).toBe(SEED_THERAPIES.length - 1);
+    expect(seedTherapies(db)).toBe(0);
+    const mine = db.select().from(therapies).all().find((t) => t.name === SEED_THERAPIES[0].name);
+    expect(mine?.description).toBe("Our own version");
+  });
+});
+
+describe("seedLinks", () => {
+  it("links the seed therapies to the seed ailments", () => {
+    const db = createTestDb();
+    seedAgents(db);
+    seedAilments(db);
+    seedTherapies(db);
+    expect(seedLinks(db)).toBe(SEED_LINKS.length);
+  });
+
+  it("seeds nothing when links already exist, or when there is nothing to link", () => {
+    const db = createTestDb();
+    expect(seedLinks(db)).toBe(0);
+    seedDatabase(db);
+    expect(seedLinks(db)).toBe(0);
   });
 });

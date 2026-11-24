@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { agentSchema, ailmentSchema } from "@/lib/validation";
+import { agentSchema, ailmentSchema, linkSchema } from "@/lib/validation";
 
 describe("agentSchema", () => {
   it("accepts and trims a name and model", () => {
@@ -49,5 +49,16 @@ describe("ailmentSchema", () => {
     const result = ailmentSchema.safeParse({ ...valid, ...override });
     expect(result.success).toBe(false);
     expect(result.error?.issues).toContainEqual(expect.objectContaining({ path: [field], message }));
+  });
+});
+
+describe("linkSchema", () => {
+  it("coerces both ids", () => {
+    expect(linkSchema.parse({ ailmentId: "2", therapyId: "5" })).toEqual({ ailmentId: 2, therapyId: 5 });
+  });
+
+  it("asks for each missing choice", () => {
+    const result = linkSchema.safeParse({ ailmentId: "", therapyId: "x" });
+    expect(result.error?.issues.map((i) => i.message)).toEqual(["Choose which ailment to treat.", "Choose a therapy."]);
   });
 });

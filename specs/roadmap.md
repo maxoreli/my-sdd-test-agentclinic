@@ -30,7 +30,7 @@ Every phase that adds or changes web UI must meet the responsive requirements in
 - List ailments (API + UI), readable on mobile without horizontal page scrolling
 - Record an ailment for an agent with a form that is usable on touch screens
 
-## Phase 6: Therapies
+## Phase 6: Therapies ✅ Complete
 
 - List therapies (API + UI), readable on mobile without horizontal page scrolling
 - Link therapies to ailments

@@ -15,6 +15,13 @@
       "when": 1795499193583,
       "tag": "0001_create_ailments",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1795499590557,
+      "tag": "0002_create_therapies",
+      "breakpoints": true
     }
   ]
 }

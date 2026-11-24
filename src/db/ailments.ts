@@ -3,14 +3,18 @@ import { count, desc, eq } from "drizzle-orm";
 import { sqliteErrorCode } from "@/lib/forms";
 import type { Db } from "./client";
 import { agents, ailments, type Ailment, type Severity } from "./schema";
+import { therapiesByAilment } from "./therapies";
 
 export interface AilmentWithAgent extends Ailment {
   agentName: string;
+  /** Therapies linked to this ailment, by name. */
+  therapies: { id: number; name: string }[];
 }
 
-/** All ailments, newest first, with the name of the agent who has each one. */
+/** All ailments, newest first, with the agent who has each one and its linked therapies. */
 export function listAilments(db: Db): AilmentWithAgent[] {
-  return db
+  const therapies = therapiesByAilment(db);
+  const rows = db
     .select({
       id: ailments.id,
       agentId: ailments.agentId,
@@ -24,6 +28,7 @@ export function listAilments(db: Db): AilmentWithAgent[] {
     .innerJoin(agents, eq(ailments.agentId, agents.id))
     .orderBy(desc(ailments.createdAt), desc(ailments.id))
     .all();
+  return rows.map((row) => ({ ...row, therapies: therapies.get(row.id) ?? [] }));
 }
 
 /** How many ailments are recorded. Every ailment is open until resolving exists. */

@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import AilmentsPage, { metadata } from "@/app/ailments/page";
 import { getDb } from "@/db/client";
+import { agents, ailments } from "@/db/schema";
 import { SEED_AGENTS, SEED_AILMENTS } from "@/db/seed";
 import { createTestDb } from "../../helpers/db";
 import { renderHtml } from "../../helpers/render";
@@ -30,7 +31,7 @@ describe("ailments page", () => {
     const html = render();
     expect(html).toMatch(/<div class="overflow-auto"><table>/);
     for (const { agent, name, severity, description } of SEED_AILMENTS) {
-      expect(html).toContain(`<td>${agent}</td><td>${name}<br/><small>${description.replace(/'/g, "&#x27;")}</small></td><td>${severity}</td>`);
+      expect(html).toContain(`<td>${agent}</td><td>${name}<br/><small>${description.replace(/'/g, "&#x27;")}</small></td><td>${severity}</td><td>`);
     }
   });
 
@@ -56,5 +57,21 @@ describe("ailments page", () => {
       throw new Error("unable to open database file");
     });
     expect(render()).toContain("npm run db:migrate");
+  });
+});
+
+describe("ailments page therapies column", () => {
+  it("lists each ailment's linked therapies", () => {
+    const html = render();
+    expect(html).toContain('<th scope="col">Therapies</th>');
+    expect(html).toContain("<td>Hallucination Grounding Session, Temperature Regulation Spa</td>");
+  });
+
+  it("says when an ailment has no therapy yet", () => {
+    const db = createTestDb();
+    vi.mocked(getDb).mockReturnValue(db);
+    db.insert(agents).values({ name: "Ada", model: "m" }).run();
+    db.insert(ailments).values({ agentId: 1, name: "Untreated", severity: "mild" }).run();
+    expect(render()).toContain("<td><small>None yet</small></td>");
   });
 });
