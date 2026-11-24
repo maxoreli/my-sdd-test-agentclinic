@@ -2,7 +2,7 @@
 
 Very small phases, each a thin vertical slice that can be shipped on its own.
 
-Phases 3–9 make up the MVP: see `specs/2026-11-23-mvp/`.
+**MVP complete ✅** Phases 1–9 are done; Phases 3–9 are specified in `specs/2026-11-23-mvp/`. The Firefox smoke tests are skipped on macOS 27 (see `playwright.config.ts`) and still need a run on another system.
 
 Every phase that adds or changes web UI must meet the responsive requirements in `specs/tech-stack.md` and be verified at mobile, tablet, and desktop widths before it ships.
 

@@ -12,6 +12,7 @@
 - Polish the clinic with Pico's jade theme, friendly 404 and error pages, an app icon, and cross-browser smoke tests
 - Document the pages, role toggle, API, and end-to-end tests in the README
 - Keep the severity list out of database code so the ailment form doesn't ship server-only modules to the browser
+- Skip the Firefox end-to-end project on macOS 27, where Playwright's Firefox build won't launch, and mark the MVP complete
 
 ## 2026-11-23
 

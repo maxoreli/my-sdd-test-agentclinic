@@ -74,3 +74,4 @@ The UI uses [PicoCSS](https://picocss.com) v2 with its jade theme: semantic HTML
 
 - **Vitest** (`npm test`): data access, validation, Server Actions, route handlers, and pages rendered to static markup, all against in-memory databases. Tests live in `tests/`, mirroring `src/`.
 - **Playwright** (`npm run test:e2e`): user flows in real browsers against a production build on port 3007. Chromium runs everything at 360px, 768px, and 1280px; a smoke test also runs in Chromium dark mode, Firefox, and WebKit. Specs live in `e2e/`.
+- **Firefox on macOS 27:** Playwright's current Firefox build won't launch there, so `playwright.config.ts` skips the Firefox project on macOS 27 (it still runs on other systems, such as Linux CI). Set `PLAYWRIGHT_FORCE_FIREFOX=1` to try it anyway.

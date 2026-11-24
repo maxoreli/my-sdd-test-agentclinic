@@ -32,7 +32,7 @@ Server-side TypeScript everywhere, using popular and well-supported tools.
 - `npm run validate` runs typecheck, Vitest, build, and then Playwright (`npm run test:e2e`); it must pass before a phase is merged.
 - Test files live in a top-level `tests/` folder that mirrors the `src/` structure (e.g. `src/components/layout/Header.tsx` → `tests/components/layout/Header.test.tsx`), and import code through the `@/` alias. Components are tested by rendering them to static markup with `react-dom/server`.
 - New features ship with Vitest tests covering their route handlers, Server Actions, server logic, and data access.
-- Playwright specs live in a top-level `e2e/` folder (`*.spec.ts`) and cover user flows plus the responsive requirements at 360px, 768px, and 1280px. They run against a production build (`next start` on port 3007) with their own database, `data/e2e.db`, rebuilt before every run. Install the browsers once with `npx playwright install`.
+- Playwright specs live in a top-level `e2e/` folder (`*.spec.ts`) and cover user flows plus the responsive requirements at 360px, 768px, and 1280px. They run against a production build (`next start` on port 3007) with their own database, `data/e2e.db`, rebuilt before every run. Install the browsers once with `npx playwright install`. Exception: Playwright's Firefox build doesn't launch on macOS 27, so the config skips Firefox there (override with `PLAYWRIGHT_FORCE_FIREFOX=1`); it still runs on other systems.
 - Form input is validated with zod schemas in `src/lib/validation.ts`; Server Actions return field errors instead of throwing.
 
 ## Why Next.js
