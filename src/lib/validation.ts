@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { SEVERITIES } from "@/db/schema";
+import { SEVERITIES } from "@/lib/severity";
 
 const requiredText = (max: number, empty: string, tooLong: string) =>
   z.string().trim().min(1, empty).max(max, tooLong);

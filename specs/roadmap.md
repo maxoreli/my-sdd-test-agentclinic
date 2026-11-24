@@ -2,6 +2,8 @@
 
 Very small phases, each a thin vertical slice that can be shipped on its own.
 
+Phases 3–9 make up the MVP: see `specs/2026-11-23-mvp/`.
+
 Every phase that adds or changes web UI must meet the responsive requirements in `specs/tech-stack.md` and be verified at mobile, tablet, and desktop widths before it ships.
 
 ## Phase 1: Skeleton ✅ Complete

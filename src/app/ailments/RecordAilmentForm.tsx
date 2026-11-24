@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import { Field, FormMessage } from "@/components/forms/Field";
-import { SEVERITIES } from "@/db/schema";
+import { SEVERITIES } from "@/lib/severity";
 import { initialFormState } from "@/lib/forms";
 import { recordAilment } from "./actions";
 

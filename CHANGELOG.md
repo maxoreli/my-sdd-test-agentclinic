@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-11-24
+
+- Add the MVP spec for roadmap Phases 3–9
+- Add the dashboard shell: header navigation, a staff/agent role toggle, dashboard panels, and Playwright end-to-end tests at mobile, tablet, and desktop widths
+- Add the agents page and `GET /api/agents`, with a staff-only form to check in new agents
+- Add ailments: the table, `GET /api/ailments`, and a form to record an ailment for an agent
+- Add therapies: the menu, `GET /api/therapies`, and a staff-only form to link therapies to ailments
+- Add appointments: the schedule, `GET /api/appointments`, and a booking form that rejects past times and double bookings
+- Replace the dashboard placeholders with real summaries of agents, open ailments, and upcoming appointments
+- Polish the clinic with Pico's jade theme, friendly 404 and error pages, an app icon, and cross-browser smoke tests
+- Document the pages, role toggle, API, and end-to-end tests in the README
+- Keep the severity list out of database code so the ailment form doesn't ship server-only modules to the browser
+
 ## 2026-11-23
 
 - Show the seeded agents on the home page in a waiting room, with a friendly fallback when the database is missing or empty

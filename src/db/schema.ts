@@ -1,4 +1,5 @@
 import { sql } from "drizzle-orm";
+import { SEVERITIES } from "@/lib/severity";
 import { index, integer, primaryKey, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 
 const createdAt = () =>
@@ -16,8 +17,7 @@ export const agents = sqliteTable("agents", {
 export type Agent = typeof agents.$inferSelect;
 export type NewAgent = typeof agents.$inferInsert;
 
-export const SEVERITIES = ["mild", "moderate", "severe"] as const;
-export type Severity = (typeof SEVERITIES)[number];
+export { SEVERITIES, type Severity } from "@/lib/severity";
 
 export const ailments = sqliteTable(
   "ailments",
