@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createDb } from "@/db/client";
 import { runMigrations } from "@/db/migrate";
-import { agents, ailments, ailmentTherapies, therapies } from "@/db/schema";
+import { agents, ailments, ailmentTherapies, appointments, therapies } from "@/db/schema";
 
 interface ColumnInfo {
   name: string;
@@ -107,5 +107,41 @@ describe("therapies migration", () => {
       { table: "therapies", from: "therapy_id" },
     ]);
     expect(() => db.insert(ailmentTherapies).values({ ailmentId: 1, therapyId: 1 }).run()).toThrow(/FOREIGN KEY/);
+  });
+});
+
+describe("appointments migration", () => {
+  function seededDb() {
+    const db = createDb(":memory:");
+    runMigrations(db);
+    const agent = db.insert(agents).values({ name: "Ada", model: "m" }).returning().get();
+    const therapy = db.insert(therapies).values({ name: "Nap", description: "z", durationMinutes: 5 }).returning().get();
+    return { db, agent, therapy };
+  }
+
+  it("creates the appointments table with the expected columns and foreign keys", () => {
+    const { db } = seededDb();
+    const columns = db.$client.pragma("table_info(appointments)") as ColumnInfo[];
+    expect(columns.map(({ name, notnull }) => ({ name, notnull }))).toEqual([
+      { name: "id", notnull: 1 },
+      { name: "agent_id", notnull: 1 },
+      { name: "therapy_id", notnull: 1 },
+      { name: "starts_at", notnull: 1 },
+      { name: "notes", notnull: 0 },
+      { name: "created_at", notnull: 1 },
+    ]);
+    const keys = db.$client.pragma("foreign_key_list(appointments)") as { table: string }[];
+    expect(keys.map((k) => k.table).sort()).toEqual(["agents", "therapies"]);
+  });
+
+  it("stops an agent having two appointments at the same start time", () => {
+    const { db, agent, therapy } = seededDb();
+    const startsAt = new Date("2026-12-01T10:00:00Z");
+    db.insert(appointments).values({ agentId: agent.id, therapyId: therapy.id, startsAt }).run();
+    expect(() => db.insert(appointments).values({ agentId: agent.id, therapyId: therapy.id, startsAt }).run()).toThrow(
+      /UNIQUE/,
+    );
+    const other = db.insert(agents).values({ name: "Bo", model: "m" }).returning().get();
+    expect(() => db.insert(appointments).values({ agentId: other.id, therapyId: therapy.id, startsAt }).run()).not.toThrow();
   });
 });

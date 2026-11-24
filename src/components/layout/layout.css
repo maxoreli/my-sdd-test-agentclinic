@@ -25,3 +25,18 @@
 .form-error {
   color: var(--pico-del-color);
 }
+
+/* Appointment schedule: cards on small screens, a table from 768px up. */
+.schedule-table {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .schedule-cards {
+    display: none;
+  }
+
+  .schedule-table {
+    display: block;
+  }
+}

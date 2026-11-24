@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { index, integer, primaryKey, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { index, integer, primaryKey, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 
 const createdAt = () =>
   integer("created_at", { mode: "timestamp" })
@@ -63,3 +63,28 @@ export const ailmentTherapies = sqliteTable(
     index("ailment_therapies_therapy_id_idx").on(table.therapyId),
   ],
 );
+
+export const appointments = sqliteTable(
+  "appointments",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    agentId: integer("agent_id")
+      .notNull()
+      .references(() => agents.id),
+    therapyId: integer("therapy_id")
+      .notNull()
+      .references(() => therapies.id),
+    /** Start time, stored as a UTC instant. */
+    startsAt: integer("starts_at", { mode: "timestamp" }).notNull(),
+    notes: text("notes"),
+    createdAt: createdAt(),
+  },
+  (table) => [
+    // An agent can't be in two places at once.
+    uniqueIndex("appointments_agent_starts_at_unique").on(table.agentId, table.startsAt),
+    index("appointments_starts_at_idx").on(table.startsAt),
+  ],
+);
+
+export type Appointment = typeof appointments.$inferSelect;
+export type NewAppointment = typeof appointments.$inferInsert;

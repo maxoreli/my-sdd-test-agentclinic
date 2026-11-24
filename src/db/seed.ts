@@ -1,7 +1,16 @@
 import { count, eq, inArray } from "drizzle-orm";
 import type { SQLiteTable } from "drizzle-orm/sqlite-core";
 import type { Queryable } from "./client";
-import { agents, ailments, ailmentTherapies, therapies, type NewAgent, type NewTherapy, type Severity } from "./schema";
+import {
+  agents,
+  ailments,
+  ailmentTherapies,
+  appointments,
+  therapies,
+  type NewAgent,
+  type NewTherapy,
+  type Severity,
+} from "./schema";
 
 /** A few regulars in the AgentClinic waiting room. */
 export const SEED_AGENTS: readonly NewAgent[] = [
@@ -82,6 +91,26 @@ export const SEED_LINKS: readonly { ailment: string; therapy: string }[] = [
   { ailment: "Token anxiety", therapy: "Token Budget Counselling" },
 ];
 
+/** Upcoming appointments, as days from the seeding date and a UTC start time. */
+export const SEED_APPOINTMENTS: readonly {
+  agent: string;
+  therapy: string;
+  daysFromNow: number;
+  utcTime: string;
+  notes: string | null;
+}[] = [
+  { agent: "Captain Context", therapy: "Context Window Decluttering", daysFromNow: 1, utcTime: "09:00", notes: "Bring only the last 10 messages." },
+  { agent: "Hallucinating Hal", therapy: "Hallucination Grounding Session", daysFromNow: 1, utcTime: "14:30", notes: null },
+  { agent: "Prompt-Fatigued Pat", therapy: "Prompt Detox", daysFromNow: 2, utcTime: "11:00", notes: "Phones (and prompts) off, please." },
+  { agent: "Token-Tight Tess", therapy: "Token Budget Counselling", daysFromNow: 3, utcTime: "16:00", notes: null },
+];
+
+/** `daysFromNow` days after `now`'s UTC date, at `utcTime` ("HH:MM") UTC. */
+export function seedStartTime(now: Date, daysFromNow: number, utcTime: string): Date {
+  const [hours, minutes] = utcTime.split(":").map(Number);
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + daysFromNow, hours, minutes));
+}
+
 /**
  * Insert the seed agents, skipping any whose name already exists, so running
  * it again is safe. Returns how many new agents were added.
@@ -140,20 +169,45 @@ export function seedLinks(db: Queryable): number {
   return db.insert(ailmentTherapies).values(rows).onConflictDoNothing().run().changes;
 }
 
+/** Book the seed appointments relative to `now`, only when no appointments exist yet. */
+export function seedAppointments(db: Queryable, now: Date): number {
+  if (!isEmpty(db, appointments)) return 0;
+  const rows = SEED_APPOINTMENTS.flatMap(({ agent, therapy, daysFromNow, utcTime, notes }) => {
+    const agentRow = db.select({ id: agents.id }).from(agents).where(eq(agents.name, agent)).get();
+    const therapyRow = db.select({ id: therapies.id }).from(therapies).where(eq(therapies.name, therapy)).get();
+    return agentRow && therapyRow
+      ? [{ agentId: agentRow.id, therapyId: therapyRow.id, startsAt: seedStartTime(now, daysFromNow, utcTime), notes }]
+      : [];
+  });
+  if (rows.length === 0) return 0;
+  return db.insert(appointments).values(rows).run().changes;
+}
+
 export interface SeedSummary {
   agents: number;
   ailments: number;
   therapies: number;
   links: number;
+  appointments: number;
 }
 
-/** Seed everything, in dependency order. Safe to run more than once. */
-export function seedDatabase(db: Queryable): SeedSummary {
+/**
+ * Seed everything, in dependency order. Safe to run more than once.
+ * Appointments are booked relative to `now`, so they are always upcoming.
+ */
+export function seedDatabase(db: Queryable, now: Date = new Date()): SeedSummary {
   return db.transaction((tx) => {
     const agentsAdded = seedAgents(tx);
     const ailmentsAdded = seedAilments(tx);
     const therapiesAdded = seedTherapies(tx);
     const linksAdded = seedLinks(tx);
-    return { agents: agentsAdded, ailments: ailmentsAdded, therapies: therapiesAdded, links: linksAdded };
+    const appointmentsAdded = seedAppointments(tx, now);
+    return {
+      agents: agentsAdded,
+      ailments: ailmentsAdded,
+      therapies: therapiesAdded,
+      links: linksAdded,
+      appointments: appointmentsAdded,
+    };
   });
 }

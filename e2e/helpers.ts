@@ -58,3 +58,10 @@ export function formStatus(page: Page): Locator {
 export function formAlert(page: Page): Locator {
   return page.locator("main").getByRole("alert");
 }
+
+/** A random future start time (as a datetime-local value) that won't clash with other tests. */
+export function futureSlot(): string {
+  const date = new Date(Date.UTC(2030 + Math.floor(Math.random() * 20), Math.floor(Math.random() * 12), 1 + Math.floor(Math.random() * 28)));
+  date.setUTCHours(Math.floor(Math.random() * 24), Math.floor(Math.random() * 60));
+  return date.toISOString().slice(0, 16);
+}

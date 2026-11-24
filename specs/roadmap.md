@@ -35,7 +35,7 @@ Every phase that adds or changes web UI must meet the responsive requirements in
 - List therapies (API + UI), readable on mobile without horizontal page scrolling
 - Link therapies to ailments
 
-## Phase 7: Appointments
+## Phase 7: Appointments ✅ Complete
 
 - View the appointment schedule, with a layout that adapts to small screens
 - Book an appointment for an agent with a therapy, using a form that is usable on touch screens

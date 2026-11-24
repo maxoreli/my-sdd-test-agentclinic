@@ -1,14 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { agents, ailments, ailmentTherapies, therapies } from "@/db/schema";
+import { agents, ailments, ailmentTherapies, appointments, therapies } from "@/db/schema";
 import {
   SEED_AGENTS,
   SEED_AILMENTS,
+  SEED_APPOINTMENTS,
   SEED_LINKS,
   SEED_THERAPIES,
   seedAgents,
   seedAilments,
+  seedAppointments,
   seedDatabase,
   seedLinks,
+  seedStartTime,
   seedTherapies,
 } from "@/db/seed";
 import { createTestDb } from "../helpers/db";
@@ -77,13 +80,15 @@ describe("seedDatabase", () => {
       ailments: SEED_AILMENTS.length,
       therapies: SEED_THERAPIES.length,
       links: SEED_LINKS.length,
+      appointments: SEED_APPOINTMENTS.length,
     });
   });
 
   it("adds nothing the second time", () => {
     const db = createTestDb();
     seedDatabase(db);
-    expect(seedDatabase(db)).toEqual({ agents: 0, ailments: 0, therapies: 0, links: 0 });
+    expect(seedDatabase(db)).toEqual({ agents: 0, ailments: 0, therapies: 0, links: 0, appointments: 0 });
+    expect(db.select().from(appointments).all()).toHaveLength(SEED_APPOINTMENTS.length);
     expect(db.select().from(therapies).all()).toHaveLength(SEED_THERAPIES.length);
     expect(db.select().from(ailmentTherapies).all()).toHaveLength(SEED_LINKS.length);
     expect(db.select().from(ailments).all()).toHaveLength(SEED_AILMENTS.length);
@@ -115,5 +120,35 @@ describe("seedLinks", () => {
     expect(seedLinks(db)).toBe(0);
     seedDatabase(db);
     expect(seedLinks(db)).toBe(0);
+  });
+});
+
+describe("seedStartTime", () => {
+  it("counts whole UTC days from now and sets the UTC time", () => {
+    const now = new Date("2026-11-30T23:59:00Z");
+    expect(seedStartTime(now, 1, "09:00").toISOString()).toBe("2026-12-01T09:00:00.000Z");
+    expect(seedStartTime(now, 3, "16:30").toISOString()).toBe("2026-12-03T16:30:00.000Z");
+  });
+});
+
+describe("seedAppointments", () => {
+  const now = new Date("2026-11-24T12:00:00Z");
+
+  it("books upcoming appointments relative to now", () => {
+    const db = createTestDb();
+    seedAgents(db);
+    seedTherapies(db);
+    expect(seedAppointments(db, now)).toBe(SEED_APPOINTMENTS.length);
+    const rows = db.select().from(appointments).all();
+    expect(rows.every((r) => r.startsAt > now)).toBe(true);
+    expect(rows.map((r) => r.startsAt.toISOString())).toContain("2026-11-25T09:00:00.000Z");
+  });
+
+  it("seeds nothing when appointments already exist, or when agents and therapies are missing", () => {
+    const db = createTestDb();
+    expect(seedAppointments(db, now)).toBe(0);
+    seedDatabase(db, now);
+    expect(seedAppointments(db, now)).toBe(0);
+    expect(db.select().from(appointments).all()).toHaveLength(SEED_APPOINTMENTS.length);
   });
 });
