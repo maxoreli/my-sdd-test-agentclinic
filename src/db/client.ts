@@ -56,3 +56,9 @@ export function getDb(): Db {
   shared ??= createDb(path, { fileMustExist: true });
   return shared;
 }
+
+/** A transaction inside `db.transaction(...)`. */
+export type Tx = Parameters<Parameters<Db["transaction"]>[0]>[0];
+
+/** Anything that can run queries: the client or a transaction. */
+export type Queryable = Db | Tx;

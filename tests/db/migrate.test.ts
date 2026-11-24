@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createDb } from "@/db/client";
 import { runMigrations } from "@/db/migrate";
-import { agents } from "@/db/schema";
+import { agents, ailments } from "@/db/schema";
 
 interface ColumnInfo {
   name: string;
@@ -47,5 +47,34 @@ describe("runMigrations", () => {
     db.insert(agents).values({ name: "Stays", model: "m" }).run();
     expect(() => runMigrations(db)).not.toThrow();
     expect(db.select().from(agents).all()).toHaveLength(1);
+  });
+});
+
+describe("ailments migration", () => {
+  function migratedDb() {
+    const db = createDb(":memory:");
+    runMigrations(db);
+    return db;
+  }
+
+  it("creates the ailments table with the expected columns", () => {
+    const columns = migratedDb().$client.pragma("table_info(ailments)") as ColumnInfo[];
+    expect(columns.map(({ name, type, notnull }) => ({ name, type, notnull }))).toEqual([
+      { name: "id", type: "INTEGER", notnull: 1 },
+      { name: "agent_id", type: "INTEGER", notnull: 1 },
+      { name: "name", type: "TEXT", notnull: 1 },
+      { name: "severity", type: "TEXT", notnull: 1 },
+      { name: "description", type: "TEXT", notnull: 0 },
+      { name: "created_at", type: "INTEGER", notnull: 1 },
+    ]);
+  });
+
+  it("links each ailment to an agent with a foreign key", () => {
+    const db = migratedDb();
+    const keys = db.$client.pragma("foreign_key_list(ailments)") as { table: string; from: string; to: string }[];
+    expect(keys).toEqual([expect.objectContaining({ table: "agents", from: "agent_id", to: "id" })]);
+    expect(() =>
+      db.insert(ailments).values({ agentId: 999, name: "Orphan", severity: "mild" }).run(),
+    ).toThrow(/FOREIGN KEY/);
   });
 });

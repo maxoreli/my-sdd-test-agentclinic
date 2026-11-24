@@ -3,9 +3,9 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { Field, FormMessage } from "@/components/forms/Field";
 
 describe("Field", () => {
-  it("labels the control by id and name", () => {
+  it("labels the control by id and name, with the label outside the control", () => {
     const html = renderToStaticMarkup(<Field id="name" label="Name">{(p) => <input {...p} />}</Field>);
-    expect(html).toBe('<label for="name">Name<input id="name" name="name"/></label>');
+    expect(html).toBe('<div><label for="name">Name</label><input id="name" name="name"/></div>');
   });
 
   it("links a hint with aria-describedby", () => {
@@ -32,5 +32,12 @@ describe("FormMessage", () => {
   it("announces success as a status and errors as an alert", () => {
     expect(renderToStaticMarkup(<FormMessage ok message="Done" />)).toBe('<p role="status" class="form-success">Done</p>');
     expect(renderToStaticMarkup(<FormMessage ok={false} message="Oops" />)).toBe('<p role="alert" class="form-error">Oops</p>');
+  });
+});
+
+describe("Field accessible name", () => {
+  it("keeps the hint out of the label, so the control's name is just the label", () => {
+    const html = renderToStaticMarkup(<Field id="name" label="Ailment" hint="For example">{(p) => <input {...p} />}</Field>);
+    expect(html).toContain('<label for="name">Ailment</label>');
   });
 });

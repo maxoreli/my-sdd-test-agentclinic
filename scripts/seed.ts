@@ -1,19 +1,21 @@
 import { createDb, databasePath } from "../src/db/client";
-import { seedAgents } from "../src/db/seed";
+import { seedDatabase, type SeedSummary } from "../src/db/seed";
 
 const path = databasePath();
 const db = createDb(path);
 
+function describe(summary: SeedSummary): string {
+  const parts = Object.entries(summary)
+    .filter(([, added]) => added > 0)
+    .map(([table, added]) => `${added} ${table}`);
+  return parts.length > 0 ? `Seeded ${parts.join(", ")}` : "Clinic already stocked; nothing new to seed";
+}
+
 try {
-  const added = seedAgents(db);
-  console.log(
-    added > 0
-      ? `🛋️  Seeded ${added} agent${added === 1 ? "" : "s"} into ${path}`
-      : `🛋️  Waiting room already full in ${path}; nothing new to seed`,
-  );
+  console.log(`🛋️  ${describe(seedDatabase(db))} in ${path}`);
 } catch (error) {
   if (error instanceof Error && /no such table/.test(error.message)) {
-    console.error(`🚑 ${path} has no agents table yet. Run \`npm run db:migrate\` first.`);
+    console.error(`🚑 ${path} is missing tables. Run \`npm run db:migrate\` first.`);
     process.exitCode = 1;
   } else {
     throw error;

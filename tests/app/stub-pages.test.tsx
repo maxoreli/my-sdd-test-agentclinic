@@ -1,11 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
-import AilmentsPage, { metadata as ailmentsMeta } from "@/app/ailments/page";
 import TherapiesPage, { metadata as therapiesMeta } from "@/app/therapies/page";
 import AppointmentsPage, { metadata as appointmentsMeta } from "@/app/appointments/page";
 
 describe.each([
-  ["Ailments", AilmentsPage, ailmentsMeta],
   ["Therapies", TherapiesPage, therapiesMeta],
   ["Appointments", AppointmentsPage, appointmentsMeta],
 ])("%s page", (title, Page, metadata) => {

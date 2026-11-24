@@ -3,7 +3,7 @@
 import { rmSync } from "node:fs";
 import { createDb, databasePath } from "../src/db/client";
 import { runMigrations } from "../src/db/migrate";
-import { seedAgents } from "../src/db/seed";
+import { seedDatabase } from "../src/db/seed";
 
 const path = databasePath();
 if (path === "data/agentclinic.db") {
@@ -16,7 +16,7 @@ for (const suffix of ["", "-wal", "-shm"]) {
 
 const db = createDb(path);
 runMigrations(db);
-seedAgents(db);
+seedDatabase(db);
 db.$client.close();
 
 console.log(`🧪 Fresh end-to-end database at ${path}`);

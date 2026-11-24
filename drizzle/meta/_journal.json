@@ -8,6 +8,13 @@
       "when": 1795333876791,
       "tag": "0000_create_agents",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1795499193583,
+      "tag": "0001_create_ailments",
+      "breakpoints": true
     }
   ]
 }

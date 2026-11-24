@@ -25,7 +25,7 @@ Every phase that adds or changes web UI must meet the responsive requirements in
 - List agents (API + UI), readable on mobile without horizontal page scrolling
 - Add an agent with a form that is usable on touch screens
 
-## Phase 5: Ailments
+## Phase 5: Ailments ✅ Complete
 
 - List ailments (API + UI), readable on mobile without horizontal page scrolling
 - Record an ailment for an agent with a form that is usable on touch screens
