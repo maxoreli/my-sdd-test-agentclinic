@@ -13,7 +13,9 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx scripts/migrate.ts",
     "db:seed": "tsx scripts/seed.ts",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "PW_SLOWMO=1000 playwright test --headed --project=chromium-desktop",
+    "test:e2e:ui": "PW_SLOWMO=1000 playwright test --ui --headed"
   },
   "dependencies": {
     "@picocss/pico": "^2.1.1",

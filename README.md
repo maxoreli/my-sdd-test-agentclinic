@@ -22,6 +22,8 @@ npm run build           # production build
 npm test                # run unit and component tests once (Vitest)
 npm run test:watch      # run Vitest in watch mode
 npm run test:e2e        # run end-to-end tests (Playwright); run `npm run build` first
+npm run test:e2e:headed # same, in visible desktop Chromium windows, slowed down to follow
+npm run test:e2e:ui     # Playwright's UI mode with live, slowed-down browser windows
 npm run typecheck       # TypeScript check
 npm run validate        # typecheck + Vitest + build + Playwright: run before merging
 ```
@@ -75,3 +77,4 @@ The UI uses [PicoCSS](https://picocss.com) v2 with its jade theme: semantic HTML
 - **Vitest** (`npm test`): data access, validation, Server Actions, route handlers, and pages rendered to static markup, all against in-memory databases. Tests live in `tests/`, mirroring `src/`.
 - **Playwright** (`npm run test:e2e`): user flows in real browsers against a production build on port 3007. Chromium runs everything at 360px, 768px, and 1280px; a smoke test also runs in Chromium dark mode, Firefox, and WebKit. Specs live in `e2e/`.
 - **Firefox on macOS 27:** Playwright's current Firefox build won't launch there, so `playwright.config.ts` skips the Firefox project on macOS 27 (it still runs on other systems, such as Linux CI). Set `PLAYWRIGHT_FORCE_FIREFOX=1` to try it anyway.
+- **Watching tests:** `test:e2e:headed` and `test:e2e:ui` pause 1 second after each browser action (`PW_SLOWMO=1000`). Change the speed with, for example, `PW_SLOWMO=1500 npx playwright test --ui --headed`. These scripts use Unix-style environment variables, so on Windows run them from Git Bash or WSL.

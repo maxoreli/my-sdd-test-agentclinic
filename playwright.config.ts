@@ -29,7 +29,15 @@ const firefoxProjects: Project[] = firefoxBrokenHere
   ? []
   : [{ name: "firefox-desktop", testMatch: /smoke\.spec\.ts/, use: { ...devices["Desktop Firefox"], viewport: desktop } }];
 
+/**
+ * Milliseconds to pause after each browser action, so you can follow along in
+ * headed or UI mode (e.g. PW_SLOWMO=600). Off by default, so normal runs stay fast.
+ */
+const slowMo = Number(process.env.PW_SLOWMO) || 0;
+
 export default defineConfig({
+  // Slowed-down runs need more time per test.
+  timeout: slowMo ? 120_000 : 30_000,
   testDir: "e2e",
   // Tests share one database and server, so run them one at a time.
   fullyParallel: false,
@@ -40,6 +48,7 @@ export default defineConfig({
   use: {
     baseURL: `http://localhost:${PORT}`,
     trace: "retain-on-failure",
+    launchOptions: { slowMo },
   },
   // Serves the production build: run `npm run build` first (`npm run validate` does).
   webServer: {
