@@ -17,6 +17,13 @@
   flex-wrap: wrap;
 }
 
+/* Make the current page obvious, not just a different colour. */
+.site-nav a[aria-current="page"] {
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+}
+
 /* Form-level messages, coloured with Pico's own success and error colours. */
 .form-success {
   color: var(--pico-ins-color);
@@ -46,4 +53,14 @@
   display: inline-flex;
   align-items: center;
   min-height: 44px;
+}
+
+/* Dashboard panels: keep each panel's link footer at the bottom of its card. */
+.dashboard > article {
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard > article > footer {
+  margin-top: auto;
 }

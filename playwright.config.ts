@@ -38,5 +38,13 @@ export default defineConfig({
     },
     { name: "chromium-tablet", use: { ...devices["Desktop Chrome"], viewport: tablet } },
     { name: "chromium-desktop", use: { ...devices["Desktop Chrome"], viewport: desktop } },
+    // Smoke checks only: dark mode on a small screen, and the other browser engines.
+    {
+      name: "chromium-dark",
+      testMatch: /smoke\.spec\.ts/,
+      use: { ...devices["Desktop Chrome"], viewport: mobile, isMobile: true, hasTouch: true, colorScheme: "dark" },
+    },
+    { name: "firefox-desktop", testMatch: /smoke\.spec\.ts/, use: { ...devices["Desktop Firefox"], viewport: desktop } },
+    { name: "webkit-desktop", testMatch: /smoke\.spec\.ts/, use: { ...devices["Desktop Safari"], viewport: desktop } },
   ],
 });

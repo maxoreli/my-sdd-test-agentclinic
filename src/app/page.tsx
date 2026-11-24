@@ -31,7 +31,7 @@ export default async function Dashboard() {
         <p>Relief for AI agents, from their humans.</p>
       </hgroup>
 
-      <div className="grid">
+      <div className="grid dashboard">
         <article aria-labelledby="panel-agents">
           <h2 id="panel-agents">Agents</h2>
           {agents.count > 0 ? (

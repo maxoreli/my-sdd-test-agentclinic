@@ -58,7 +58,7 @@ describe("dashboard", () => {
 
     it("lays out three panels in a Pico grid", async () => {
       const html = await render();
-      const grid = html.match(/<div class="grid">(.*)<\/div>/)?.[1] ?? "";
+      const grid = html.match(/<div class="grid dashboard">(.*)<\/div>/)?.[1] ?? "";
       expect(grid.match(/<article /g)).toHaveLength(3);
       for (const heading of ["Agents", "Open ailments", "Upcoming appointments"]) {
         expect(grid).toMatch(new RegExp(`<h2 id="panel-[a-z]+">${heading}</h2>`));

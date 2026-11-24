@@ -7,7 +7,7 @@ Server-side TypeScript everywhere, using popular and well-supported tools.
 | Language | TypeScript (strict) |
 | Framework | Next.js (App Router), server-rendered with React Server Components |
 | Server logic | Server Components, Server Actions, and Route Handlers running on Node.js |
-| Styling | PicoCSS v2 (`@picocss/pico`), semantic HTML with small `--pico-*` variable overrides |
+| Styling | PicoCSS v2 (`@picocss/pico`), jade theme, semantic HTML with small `--pico-*` variable overrides |
 | Database | SQLite (single local file, no separate database server) via Drizzle ORM and `better-sqlite3` |
 | Validation | zod schemas, shared by Server Actions and tests |
 | Target browsers | Modern evergreen browsers |
@@ -15,7 +15,7 @@ Server-side TypeScript everywhere, using popular and well-supported tools.
 
 ## Web UI requirements
 
-- Style with PicoCSS: import `@picocss/pico/css/pico.min.css` once in the root layout, prefer semantic elements and Pico's `container` class over custom class names, and customise through `--pico-*` CSS variables, plus minimal rules on the app's own class names (such as `.site-nav`) only where Pico has no equivalent, never by overriding Pico's selectors. Keep Pico's automatic light and dark colour schemes. Do not add a second CSS framework.
+- Style with PicoCSS: import the jade theme, `@picocss/pico/css/pico.jade.min.css`, once in the root layout, prefer semantic elements and Pico's `container` class over custom class names, and customise through `--pico-*` CSS variables, plus minimal rules on the app's own class names (such as `.site-nav`) only where Pico has no equivalent, never by overriding Pico's selectors. Keep Pico's automatic light and dark colour schemes. Do not add a second CSS framework.
 - Build responsive layouts that work on narrow mobile screens, tablets, and desktop screens.
 - Write mobile-first CSS: base styles target small screens, and `min-width` media queries add layout for wider screens.
 - Reference widths for verification: 360px (mobile), 768px (tablet), and 1280px (desktop).

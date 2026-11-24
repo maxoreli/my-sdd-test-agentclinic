@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
-// PicoCSS loads first, so the app's variable overrides in layout.css win.
-import "@picocss/pico/css/pico.min.css";
+// PicoCSS (jade theme) loads first, so the app's variable overrides in layout.css win.
+import "@picocss/pico/css/pico.jade.min.css";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { getRole } from "@/lib/role";
 
