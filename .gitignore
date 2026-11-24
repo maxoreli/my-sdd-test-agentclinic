@@ -12,3 +12,12 @@ yarn-error.log*
 /.next
 next-env.d.ts
 *.tsbuildinfo
+
+# SQLite database files
+data/*.db*
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

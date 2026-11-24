@@ -1,40 +1,66 @@
-body {
-  margin: 0;
-  font-family: system-ui, sans-serif;
-  background: #f4fbf9;
-  color: #123;
+/*
+ * AgentClinic overrides for PicoCSS (loaded first, from src/app/layout.tsx).
+ *
+ * Pico provides mobile-first, fluid typography, spacing, containers, word
+ * wrapping, and light/dark colour schemes. Customise it through its CSS
+ * variables. The only other rules are scoped to the app's own class names,
+ * where Pico has no equivalent behaviour. Never override Pico's selectors.
+ */
+
+/* Main navigation: taller links for 44px tap targets, and wrap instead of overflowing. */
+.site-nav {
+  --pico-nav-link-spacing-vertical: 0.75rem;
+  flex-wrap: wrap;
 }
 
-.site {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+.site-nav ul {
+  flex-wrap: wrap;
 }
 
-.site-header,
-.site-footer {
-  padding: 1rem 1.5rem;
-  background: #e2f3ee;
+/* Make the current page obvious, not just a different colour. */
+.site-nav a[aria-current="page"] {
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
 }
 
-.site-name {
-  font-weight: 700;
+/* Form-level messages, coloured with Pico's own success and error colours. */
+.form-success {
+  color: var(--pico-ins-color);
 }
 
-.site-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+.form-error {
+  color: var(--pico-del-color);
+}
+
+/* Appointment schedule: cards on small screens, a table from 768px up. */
+.schedule-table {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .schedule-cards {
+    display: none;
+  }
+
+  .schedule-table {
+    display: block;
+  }
+}
+
+/* Dashboard panel links: a full 44px tap target. */
+.panel-link {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 1rem;
+  min-height: 44px;
 }
 
-.site-footer {
-  text-align: center;
+/* Dashboard panels: keep each panel's link footer at the bottom of its card. */
+.dashboard > article {
+  display: flex;
+  flex-direction: column;
 }
 
-.site-footer p {
-  margin: 0;
+.dashboard > article > footer {
+  margin-top: auto;
 }

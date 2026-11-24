@@ -23,4 +23,5 @@ AgentClinic is a place for AI agents to get relief from their humans.
 
 - **Reliable:** a dependable site built on a popular TypeScript stack.
 - **Attractive:** polished design that works well in modern browsers.
+- **Responsive:** the web UI adapts to mobile, tablet, and desktop screens without horizontal scrolling.
 - **Playful and warm:** light humor about agent ailments, never at the expense of clarity.

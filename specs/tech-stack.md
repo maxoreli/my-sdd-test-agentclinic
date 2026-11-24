@@ -3,12 +3,37 @@
 Server-side TypeScript everywhere, using popular and well-supported tools.
 
 | Layer | Choice |
-|-------|--------|
+| --- | --- |
 | Language | TypeScript (strict) |
 | Framework | Next.js (App Router), server-rendered with React Server Components |
 | Server logic | Server Components, Server Actions, and Route Handlers running on Node.js |
-| Database | SQLite (single local file, no separate database server) |
+| Styling | PicoCSS v2 (`@picocss/pico`), jade theme, semantic HTML with small `--pico-*` variable overrides |
+| Database | SQLite (single local file, no separate database server) via Drizzle ORM and `better-sqlite3` |
+| Validation | zod schemas, shared by Server Actions and tests |
 | Target browsers | Modern evergreen browsers |
+| Testing | Vitest (unit and component), Playwright (end-to-end, in real browsers) |
+
+## Web UI requirements
+
+- Style with PicoCSS: import the jade theme, `@picocss/pico/css/pico.jade.min.css`, once in the root layout, prefer semantic elements and Pico's `container` class over custom class names, and customise through `--pico-*` CSS variables, plus minimal rules on the app's own class names (such as `.site-nav`) only where Pico has no equivalent, never by overriding Pico's selectors. Keep Pico's automatic light and dark colour schemes. Do not add a second CSS framework.
+- Build responsive layouts that work on narrow mobile screens, tablets, and desktop screens.
+- Write mobile-first CSS: base styles target small screens, and `min-width` media queries add layout for wider screens.
+- Reference widths for verification: 360px (mobile), 768px (tablet), and 1280px (desktop).
+- Include the device-width viewport declaration and use fluid widths, spacing, and typography (`clamp()`, `min()`, `%`, `rem`) instead of fixed desktop dimensions.
+- No horizontal page scrolling at any reference width. Long text wraps, and images and media scale down to fit their container.
+- Wide content such as tables reflows on small screens or scrolls inside its own container, never the whole page.
+- Keep content readable and controls usable at small widths: body text at least 16px, and tap targets at least 44×44px.
+- Verify each UI feature at all three reference widths before its phase is merged.
+
+## Testing and validation
+
+- Every phase is validated with automated Vitest and Playwright tests, alongside the checks in that phase's `validation.md`.
+- Tests run through npm scripts in `package.json`: `npm test` (`vitest run`) and `npm run test:watch` (`vitest`).
+- `npm run validate` runs typecheck, Vitest, build, and then Playwright (`npm run test:e2e`); it must pass before a phase is merged.
+- Test files live in a top-level `tests/` folder that mirrors the `src/` structure (e.g. `src/components/layout/Header.tsx` → `tests/components/layout/Header.test.tsx`), and import code through the `@/` alias. Components are tested by rendering them to static markup with `react-dom/server`.
+- New features ship with Vitest tests covering their route handlers, Server Actions, server logic, and data access.
+- Playwright specs live in a top-level `e2e/` folder (`*.spec.ts`) and cover user flows plus the responsive requirements at 360px, 768px, and 1280px. They run against a production build (`next start` on port 3007) with their own database, `data/e2e.db`, rebuilt before every run. Install the browsers once with `npx playwright install`. Exception: Playwright's Firefox build doesn't launch on macOS 27, so the config skips Firefox there (override with `PLAYWRIGHT_FORCE_FIREFOX=1`); it still runs on other systems.
+- Form input is validated with zod schemas in `src/lib/validation.ts`; Server Actions return field errors instead of throwing.
 
 ## Why Next.js
 
@@ -16,6 +41,12 @@ Server-side TypeScript everywhere, using popular and well-supported tools.
 - **Reliable and popular (Mary):** the most widely used TypeScript web framework, with a large ecosystem and long-term support.
 - **Dashboard-friendly:** layouts and nested routing suit a dashboard shell with agents, ailments, therapies, and appointments.
 - **Attractive (Steve):** pairs well with modern CSS tooling and renders fast in modern browsers.
+
+## Why PicoCSS
+
+- **Attractive by default:** well-designed typography, forms, and spacing from plain semantic HTML, with light and dark themes built in.
+- **Responsive and mobile-first:** fluid containers and type scale help meet the Web UI requirements with little custom CSS.
+- **Lightweight and simple:** a single stylesheet with no build plugin or class soup, so it's easy to follow in a course or a live demo.
 
 ## Notes
 
