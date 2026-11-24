@@ -48,3 +48,13 @@ export async function useRole(page: Page, role: "staff" | "agent"): Promise<void
 export function uniqueName(prefix: string): string {
   return `${prefix} ${Date.now().toString(36)}${Math.floor(Math.random() * 1000)}`;
 }
+
+/** The form's success message (scoped to <main>: Next.js adds its own route announcer). */
+export function formStatus(page: Page): Locator {
+  return page.locator("main").getByRole("status");
+}
+
+/** The form's error summary (scoped to <main>: Next.js adds its own route announcer). */
+export function formAlert(page: Page): Locator {
+  return page.locator("main").getByRole("alert");
+}

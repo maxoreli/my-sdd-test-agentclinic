@@ -20,7 +20,7 @@ Every phase that adds or changes web UI must meet the responsive requirements in
 - Navigation stays usable on small screens (it wraps or collapses instead of overflowing)
 - Dashboard panels stack on mobile and form a grid on wider screens
 
-## Phase 4: Agents
+## Phase 4: Agents ✅ Complete
 
 - List agents (API + UI), readable on mobile without horizontal page scrolling
 - Add an agent with a form that is usable on touch screens

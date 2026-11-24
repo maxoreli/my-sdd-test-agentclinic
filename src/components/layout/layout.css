@@ -16,3 +16,12 @@
 .site-nav ul {
   flex-wrap: wrap;
 }
+
+/* Form-level messages, coloured with Pico's own success and error colours. */
+.form-success {
+  color: var(--pico-ins-color);
+}
+
+.form-error {
+  color: var(--pico-del-color);
+}

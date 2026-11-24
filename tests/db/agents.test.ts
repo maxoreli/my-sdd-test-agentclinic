@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { countAgents, listAgents } from "@/db/agents";
+import { countAgents, createAgent, listAgents } from "@/db/agents";
 import { agents } from "@/db/schema";
 import { SEED_AGENTS } from "@/db/seed";
 import { createTestDb } from "../helpers/db";
@@ -47,5 +47,20 @@ describe("listAgents", () => {
       model: expect.any(String),
       createdAt: expect.any(Date),
     });
+  });
+});
+
+describe("createAgent", () => {
+  it("adds an agent and returns it", () => {
+    const db = createTestDb();
+    const result = createAgent(db, { name: "Fresh Fran", model: "Newbie-1" });
+    expect(result).toMatchObject({ status: "created", agent: { name: "Fresh Fran", model: "Newbie-1" } });
+    expect(countAgents(db)).toBe(1);
+  });
+
+  it("reports a duplicate name instead of throwing", () => {
+    const db = createTestDb({ seed: true });
+    expect(createAgent(db, { name: SEED_AGENTS[0].name, model: "x" })).toEqual({ status: "duplicate-name" });
+    expect(countAgents(db)).toBe(SEED_AGENTS.length);
   });
 });
