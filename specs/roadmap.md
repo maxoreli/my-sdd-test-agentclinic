@@ -14,7 +14,7 @@ Every phase that adds or changes web UI must meet the responsive requirements in
 - Connect SQLite and add a migration setup
 - One seeded table to prove the round trip
 
-## Phase 3: Dashboard shell
+## Phase 3: Dashboard shell ✅ Complete
 
 - Layout, navigation, and a landing dashboard with placeholder content
 - Navigation stays usable on small screens (it wraps or collapses instead of overflowing)

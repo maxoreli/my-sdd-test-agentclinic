@@ -1,11 +1,18 @@
 /*
  * AgentClinic overrides for PicoCSS (loaded first, from src/app/layout.tsx).
  *
- * Pico already provides mobile-first, fluid typography, spacing, containers,
- * word wrapping, and light/dark colour schemes. Customise it here only through
- * its CSS variables, never by overriding Pico's own selectors, for example:
- *
- *   :root {
- *     --pico-border-radius: 0.5rem;
- *   }
+ * Pico provides mobile-first, fluid typography, spacing, containers, word
+ * wrapping, and light/dark colour schemes. Customise it through its CSS
+ * variables. The only other rules are scoped to the app's own class names,
+ * where Pico has no equivalent behaviour. Never override Pico's selectors.
  */
+
+/* Main navigation: taller links for 44px tap targets, and wrap instead of overflowing. */
+.site-nav {
+  --pico-nav-link-spacing-vertical: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.site-nav ul {
+  flex-wrap: wrap;
+}

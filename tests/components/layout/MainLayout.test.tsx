@@ -1,16 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { renderToStaticMarkup } from "react-dom/server";
+import { renderHtml } from "../../helpers/render";
 import { MainLayout } from "@/components/layout/MainLayout";
 
 describe("MainLayout", () => {
-  const html = renderToStaticMarkup(
-    <MainLayout>
+  const html = renderHtml(
+    <MainLayout role="staff">
       <p>page content</p>
     </MainLayout>,
   );
 
-  it("renders the header with the AgentClinic name", () => {
-    expect(html).toMatch(/<header class="container">.*AgentClinic.*<\/header>/);
+  it("renders the header with the AgentClinic name and navigation", () => {
+    expect(html).toMatch(/<header class="container"><nav [^>]*>.*AgentClinic.*<\/nav><\/header>/);
   });
 
   it("renders page content inside main", () => {
@@ -29,8 +29,12 @@ describe("MainLayout", () => {
     expect(main).toBeLessThan(footer);
   });
 
-  it("has no navigation or links", () => {
-    expect(html).not.toContain("<nav");
-    expect(html).not.toContain("<a ");
+  it("passes the role to the header", () => {
+    const agentHtml = renderHtml(
+      <MainLayout role="agent">
+        <p>x</p>
+      </MainLayout>,
+    );
+    expect(agentHtml).toContain("Viewing as agent");
   });
 });

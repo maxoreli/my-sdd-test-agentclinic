@@ -8,13 +8,14 @@ Server-side TypeScript everywhere, using popular and well-supported tools.
 | Framework | Next.js (App Router), server-rendered with React Server Components |
 | Server logic | Server Components, Server Actions, and Route Handlers running on Node.js |
 | Styling | PicoCSS v2 (`@picocss/pico`), semantic HTML with small `--pico-*` variable overrides |
-| Database | SQLite (single local file, no separate database server) |
+| Database | SQLite (single local file, no separate database server) via Drizzle ORM and `better-sqlite3` |
+| Validation | zod schemas, shared by Server Actions and tests |
 | Target browsers | Modern evergreen browsers |
-| Testing | Vitest |
+| Testing | Vitest (unit and component), Playwright (end-to-end, in real browsers) |
 
 ## Web UI requirements
 
-- Style with PicoCSS: import `@picocss/pico/css/pico.min.css` once in the root layout, prefer semantic elements and Pico's `container` class over custom class names, and customise only through `--pico-*` CSS variables, never by overriding Pico's selectors. Keep Pico's automatic light and dark colour schemes. Do not add a second CSS framework.
+- Style with PicoCSS: import `@picocss/pico/css/pico.min.css` once in the root layout, prefer semantic elements and Pico's `container` class over custom class names, and customise through `--pico-*` CSS variables, plus minimal rules on the app's own class names (such as `.site-nav`) only where Pico has no equivalent, never by overriding Pico's selectors. Keep Pico's automatic light and dark colour schemes. Do not add a second CSS framework.
 - Build responsive layouts that work on narrow mobile screens, tablets, and desktop screens.
 - Write mobile-first CSS: base styles target small screens, and `min-width` media queries add layout for wider screens.
 - Reference widths for verification: 360px (mobile), 768px (tablet), and 1280px (desktop).
@@ -26,11 +27,13 @@ Server-side TypeScript everywhere, using popular and well-supported tools.
 
 ## Testing and validation
 
-- Every phase is validated with automated Vitest tests, alongside the checks in that phase's `validation.md`.
+- Every phase is validated with automated Vitest and Playwright tests, alongside the checks in that phase's `validation.md`.
 - Tests run through npm scripts in `package.json`: `npm test` (`vitest run`) and `npm run test:watch` (`vitest`).
-- `npm run validate` runs typecheck, tests, and build; it must pass before a phase is merged.
+- `npm run validate` runs typecheck, Vitest, build, and then Playwright (`npm run test:e2e`); it must pass before a phase is merged.
 - Test files live in a top-level `tests/` folder that mirrors the `src/` structure (e.g. `src/components/layout/Header.tsx` → `tests/components/layout/Header.test.tsx`), and import code through the `@/` alias. Components are tested by rendering them to static markup with `react-dom/server`.
-- New features ship with Vitest tests covering their route handlers, server logic, and data access.
+- New features ship with Vitest tests covering their route handlers, Server Actions, server logic, and data access.
+- Playwright specs live in a top-level `e2e/` folder (`*.spec.ts`) and cover user flows plus the responsive requirements at 360px, 768px, and 1280px. They run against a production build (`next start` on port 3007) with their own database, `data/e2e.db`, rebuilt before every run. Install the browsers once with `npx playwright install`.
+- Form input is validated with zod schemas in `src/lib/validation.ts`; Server Actions return field errors instead of throwing.
 
 ## Why Next.js
 
